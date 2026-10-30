@@ -2,37 +2,40 @@ package config
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"sync"
 
-	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 // Config 全局配置结构
 type Config struct {
-	Server   ServerConfig   `mapstructure:"server"`
-	Database DatabaseConfig `mapstructure:"database"`
-	Redis    RedisConfig    `mapstructure:"redis"`
-	JWT      JWTConfig      `mapstructure:"jwt"`
-	SD       SDConfig       `mapstructure:"sd"`
-	Upload   UploadConfig   `mapstructure:"upload"`
+	Server   ServerConfig   `yaml:"server"`
+	Database DatabaseConfig `yaml:"database"`
+	Redis    RedisConfig    `yaml:"redis"`
+	JWT      JWTConfig      `yaml:"jwt"`
+	SD       SDConfig       `yaml:"sd"`
+	Upload   UploadConfig   `yaml:"upload"`
 }
 
 // ServerConfig 服务配置
 type ServerConfig struct {
-	Port int    `mapstructure:"port"`
-	Mode string `mapstructure:"mode"` // debug | release | test
+	Port int    `yaml:"port"`
+	Mode string `yaml:"mode"` // debug | release | test
 }
 
 // DatabaseConfig 数据库配置
 type DatabaseConfig struct {
-	Host            string `mapstructure:"host"`
-	Port            int    `mapstructure:"port"`
-	User            string `mapstructure:"user"`
-	Password        string `mapstructure:"password"`
-	DBName          string `mapstructure:"dbname"`
-	SearchPath      string `mapstructure:"search_path"`
-	MaxIdleConns    int    `mapstructure:"max_idle_conns"`
-	MaxOpenConns    int    `mapstructure:"max_open_conns"`
-	ConnMaxLifetime int    `mapstructure:"conn_max_lifetime"`
+	Host            string `yaml:"host"`
+	Port            int    `yaml:"port"`
+	User            string `yaml:"user"`
+	Password        string `yaml:"password"`
+	DBName          string `yaml:"dbname"`
+	SearchPath      string `yaml:"search_path"`
+	MaxIdleConns    int    `yaml:"max_idle_conns"`
+	MaxOpenConns    int    `yaml:"max_open_conns"`
+	ConnMaxLifetime int    `yaml:"conn_max_lifetime"`
 }
 
 func (d *DatabaseConfig) DSN() string {
@@ -46,10 +49,10 @@ func (d *DatabaseConfig) DSN() string {
 
 // RedisConfig Redis 配置
 type RedisConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	Password string `mapstructure:"password"`
-	DB       int    `mapstructure:"db"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
 }
 
 // Addr 返回 Redis 地址
@@ -59,90 +62,52 @@ func (r *RedisConfig) Addr() string {
 
 // JWTConfig JWT 配置
 type JWTConfig struct {
-	Secret          string `mapstructure:"secret"`
-	AccessTokenTTL  int    `mapstructure:"access_token_ttl"`  // 分钟
-	RefreshTokenTTL int    `mapstructure:"refresh_token_ttl"` // 小时
+	Secret          string `yaml:"secret"`
+	AccessTokenTTL  int    `yaml:"access_token_ttl"`
+	RefreshTokenTTL int    `yaml:"refresh_token_ttl"`
 }
 
 // SDConfig Stable Diffusion 配置
 type SDConfig struct {
-	Provider       string `mapstructure:"provider"`
-	BaseURL        string `mapstructure:"base_url"`        // A1111 地址
-	APIKey         string `mapstructure:"api_key"`         // Replicate API Key
-	MaxConcurrent  int    `mapstructure:"max_concurrent"`  // 最大并发数
-	RequestTimeout int    `mapstructure:"request_timeout"` // 请求超时(秒)
+	Provider       string `yaml:"provider"`
+	BaseURL        string `yaml:"base_url"`        // A1111 地址
+	APIKey         string `yaml:"api_key"`         // Replicate API Key
+	MaxConcurrent  int    `yaml:"max_concurrent"`  // 最大并发数
+	RequestTimeout int    `yaml:"request_timeout"` // 请求超时(秒)
 
-	MockImageDir string `mapstructure:"mock_image_dir"`
-	MockDelayMs  int    `mapstructure:"mock_delay_ms"`
+	MockImageDir string `yaml:"mock_image_dir"`
+	MockDelayMs  int    `yaml:"mock_delay_ms"`
 }
 
 // UploadConfig 上传配置
 type UploadConfig struct {
-	Dir     string `mapstructure:"dir"`      // 图片存储目录
-	MaxSize int64  `mapstructure:"max_size"` // 最大文件大小(MB)
+	Dir     string `yaml:"dir"`      // 图片存储目录
+	MaxSize int64  `yaml:"max_size"` // 最大文件大小(MB)
 }
 
-// Load 加载配置: 先读 config.yaml，环境变量可覆盖
-func Load() (*Config, error) {
-	v := viper.New()
+var once sync.Once
+var config = &Config{}
 
-	// 配置文件路径
-	v.SetConfigName("config")
-	v.SetConfigType("yaml")
-	v.AddConfigPath(".")
-	v.AddConfigPath("./backend")
-
-	// 环境变量覆盖
-	v.AutomaticEnv()
-	v.SetEnvPrefix("N2C")
-
-	// 设置默认值
-	setDefaults(v)
-
-	// 读取配置文件
-	if err := v.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return nil, fmt.Errorf("读取配置文件失败: %w", err)
+// Load 加载配置
+func Load(path string) (*Config, error) {
+	once.Do(func() {
+		conf, err := os.ReadFile(path)
+		if err != nil {
+			log.Fatalln("read config file error:", err)
 		}
-		// 配置文件不存在时继续
-	}
-
-	var cfg Config
-	if err := v.Unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("解析配置失败: %w", err)
-	}
-
-	return &cfg, nil
+		if err := yaml.Unmarshal(conf, config); err != nil {
+			log.Fatalln("unmarshal config file error:", err)
+		}
+	})
+	return config, nil
 }
 
-func setDefaults(v *viper.Viper) {
-	v.SetDefault("server.port", 8080)
-	v.SetDefault("server.mode", "debug")
-
-	v.SetDefault("database.host", "127.0.0.1")
-	v.SetDefault("database.port", 5432)
-	v.SetDefault("database.user", "postgres")
-	v.SetDefault("database.password", "")
-	v.SetDefault("database.dbname", "novel_photo_test")
-	v.SetDefault("database.max_idle_conns", 10)
-	v.SetDefault("database.max_open_conns", 100)
-	v.SetDefault("database.conn_max_lifetime", 3600)
-
-	v.SetDefault("redis.host", "127.0.0.1")
-	v.SetDefault("redis.port", 6379)
-	v.SetDefault("redis.password", "")
-	v.SetDefault("redis.db", 0)
-
-	v.SetDefault("jwt.secret", "change-me-in-production")
-	v.SetDefault("jwt.access_token_ttl", 15)
-	v.SetDefault("jwt.refresh_token_ttl", 168) // 7 天
-
-	v.SetDefault("sd.provider", "")
-	v.SetDefault("sd.max_concurrent", 2)
-	v.SetDefault("sd.request_timeout", 300)
-	v.SetDefault("sd.mock_image_dir", "uploads/local_image")
-	v.SetDefault("sd.mock_delay_ms", 1200)
-
-	v.SetDefault("upload.dir", "uploads/generated")
-	v.SetDefault("upload.max_size", 10)
+func Temple() []byte{
+	conf := Config{}
+	out, err := yaml.Marshal(conf)
+	if err != nil {
+		log.Printf("marshal config file error: %s", err)
+		return nil
+	}
+	return out
 }
