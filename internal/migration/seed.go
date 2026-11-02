@@ -2,6 +2,7 @@ package migration
 
 import (
 	"log"
+	"log/slog"
 	"photo-web/internal/models"
 
 	"gorm.io/gorm"
@@ -18,10 +19,10 @@ func Migrate(db *gorm.DB) {
 	}
 }
 
-func SeedStyles(db *gorm.DB) {
+func SeedStyles(db *gorm.DB, logger *slog.Logger) {
 	var count int64
 	if err := db.Model(&models.ImageStyle{}).Count(&count).Error; err != nil {
-		log.Printf("检查风格数据失败: %v", err)
+		logger.Error("检查风格数据失败", slog.String("err", err.Error()))
 		return
 	}
 
@@ -62,8 +63,8 @@ func SeedStyles(db *gorm.DB) {
 		},
 	}
 	if err := db.Create(&styles).Error; err != nil {
-		log.Printf("插入种子风格数据失败: %v", err)
+		logger.Error("插入风格种子失败", slog.String("err", err.Error()))
 		return
 	}
-	log.Println("已插入 6 条预设风格种子数据")
+	logger.Info("已插入6条预设风格种子")
 }

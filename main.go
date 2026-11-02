@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -30,6 +31,12 @@ func main() {
 		log.Fatalf("加载配置失败: %v", err)
 	}
 
+	logger, err := bootstrap.NewLogger(cfg, os.Stdout)
+	if err != nil {
+		log.Fatalf("日志初始化失败：%v", err)
+	}
+	slog.SetDefault(logger)
+
 	// 初始化数据库
 	db, err := bootstrap.InitDB(cfg)
 	if err != nil {
@@ -40,7 +47,7 @@ func main() {
 	migration.Migrate(db)
 
 	// 生成种子风格
-	migration.SeedStyles(db)
+	migration.SeedStyles(db, logger)
 
 	// 初始化 Redis
 	rdb, err := redis.NewClient(cfg)
@@ -59,11 +66,11 @@ func main() {
 	// 依赖注入 - Service 层
 	authService := service.NewAuthService(userRepo, rdb, cfg)
 	sdClient := service.NewSDClient(cfg)
-	generationService := service.NewGenerationService(generationRepo, styleRepo, sdClient, cfg)
+	generationService := service.NewGenerationService(generationRepo, styleRepo, sdClient, cfg, logger)
 	historyService := service.NewHistoryService(generationRepo)
 
 	// 初始化路由
-	r := router.Setup(cfg, authService, generationService, historyService)
+	r := router.Setup(cfg, logger, authService, generationService, historyService)
 
 	// 启动服务器
 	srv := &http.Server{

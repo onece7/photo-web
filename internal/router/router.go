@@ -1,6 +1,7 @@
 package router
 
 import (
+	"log/slog"
 	jwtpkg "photo-web/internal/jwt"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ import (
 // Setup 初始化路由
 func Setup(
 	cfg *config.Config,
+	logger *slog.Logger,
 	authService *service.AuthService,
 	generationService *service.GenerationService,
 	historyService *service.HistoryService,
@@ -24,7 +26,7 @@ func Setup(
 	r := gin.New()
 
 	// 全局中间件
-	r.Use(middleware.Logger())
+	r.Use(middleware.Logger(logger))
 	r.Use(middleware.CORS())
 	r.Use(gin.Recovery())
 

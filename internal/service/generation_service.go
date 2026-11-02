@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"photo-web/internal/api"
@@ -22,6 +23,7 @@ type GenerationService struct {
 	sdClient  *sdClient
 	cfg       *config.Config
 	sem       chan struct{} // 并发控制信号量
+	logger    *slog.Logger
 }
 
 // NewGenerationService 创建生成 Service
@@ -30,6 +32,7 @@ func NewGenerationService(
 	styleRepo repository.StyleRepository,
 	sdClient *sdClient,
 	cfg *config.Config,
+	logger *slog.Logger,
 ) *GenerationService {
 	return &GenerationService{
 		genRepo:   genRepo,
@@ -37,6 +40,7 @@ func NewGenerationService(
 		sdClient:  sdClient,
 		cfg:       cfg,
 		sem:       make(chan struct{}, cfg.SD.MaxConcurrent),
+		logger:    logger,
 	}
 }
 

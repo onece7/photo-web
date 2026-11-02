@@ -7,7 +7,7 @@ database:
   port: 5432
   user: postgres
   password: ""
-  dbname: novel_photo_test
+  dbname: photo_web
   max_idle_conns: 10
   max_open_conns: 100
   conn_max_lifetime: 3600
@@ -31,6 +31,11 @@ sd:
   request_timeout: 300       # 请求超时(秒)
   mock_image_dir: "uploads/local_image"
   mock_delay_ms: 1200
+
+logger:
+  level: info
+  format: json
+  add_source: false
 
 upload:
   dir: "uploads/generated"

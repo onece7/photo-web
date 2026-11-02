@@ -12,6 +12,7 @@ import (
 // Config 全局配置结构
 type Config struct {
 	Server   ServerConfig   `yaml:"server"`
+	Logger   LoggerConfig   `yaml:"logger"`
 	Database DatabaseConfig `yaml:"database"`
 	Redis    RedisConfig    `yaml:"redis"`
 	JWT      JWTConfig      `yaml:"jwt"`
@@ -23,6 +24,12 @@ type Config struct {
 type ServerConfig struct {
 	Port int    `yaml:"port"`
 	Mode string `yaml:"mode"` // debug | release | test
+}
+
+type LoggerConfig struct {
+	Level     string `yaml:"level"`
+	Format    string `yaml:"format"`
+	AddSource bool   `yaml:"add_source"`
 }
 
 // DatabaseConfig 数据库配置
@@ -102,7 +109,7 @@ func Load(path string) (*Config, error) {
 	return config, nil
 }
 
-func Temple() []byte{
+func Temple() []byte {
 	conf := Config{}
 	out, err := yaml.Marshal(conf)
 	if err != nil {
