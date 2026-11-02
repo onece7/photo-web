@@ -1,13 +1,14 @@
 package router
 
 import (
+	jwtpkg "photo-web/internal/jwt"
+
 	"github.com/gin-gonic/gin"
 
 	"photo-web/internal/config"
 	"photo-web/internal/handlers"
 	"photo-web/internal/middleware"
 	"photo-web/internal/service"
-	jwtpkg "photo-web/pkg/jwt"
 )
 
 // Setup 初始化路由

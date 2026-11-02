@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"net/http"
+	"photo-web/internal/api"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"photo-web/internal/models"
 	"photo-web/internal/service"
-	"photo-web/pkg/response"
 )
 
 // GenerationHandler 图片生成处理器
@@ -26,10 +26,10 @@ func NewGenerationHandler(genService *service.GenerationService) *GenerationHand
 func (h *GenerationHandler) GetStyles(c *gin.Context) {
 	styles, err := h.genService.GetActiveStyles(c.Request.Context())
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, response.CodeInternal, "获取风格列表失败")
+		api.Error(c, http.StatusInternalServerError, api.CodeInternal, "获取风格列表失败")
 		return
 	}
-	response.Success(c, styles)
+	api.Success(c, styles)
 }
 
 // SimpleGenerate 普通模式生成
@@ -37,23 +37,23 @@ func (h *GenerationHandler) GetStyles(c *gin.Context) {
 func (h *GenerationHandler) SimpleGenerate(c *gin.Context) {
 	userID, err := GetUserID(c)
 	if err != nil {
-		response.Unauthorized(c, "")
+		api.Unauthorized(c, "")
 		return
 	}
 
-	var req models.SimpleGenerateRequest
+	var req api.SimpleGenerateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "请输入提示词并选择风格")
+		api.BadRequest(c, "请输入提示词并选择风格")
 		return
 	}
 
 	resp, err := h.genService.GenerateSimple(c.Request.Context(), userID, &req)
 	if err != nil {
-		response.Error(c, 400, response.CodeGenFailed, err.Error())
+		api.Error(c, 400, api.CodeGenFailed, err.Error())
 		return
 	}
 
-	response.Accepted(c, resp)
+	api.Accepted(c, resp)
 }
 
 // ProGenerate 专业模式生成
@@ -61,23 +61,23 @@ func (h *GenerationHandler) SimpleGenerate(c *gin.Context) {
 func (h *GenerationHandler) ProGenerate(c *gin.Context) {
 	userID, err := GetUserID(c)
 	if err != nil {
-		response.Unauthorized(c, "")
+		api.Unauthorized(c, "")
 		return
 	}
 
-	var req models.ProGenerateRequest
+	var req api.ProGenerateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "请填写有效的生成参数")
+		api.BadRequest(c, "请填写有效的生成参数")
 		return
 	}
 
 	resp, err := h.genService.GeneratePro(c.Request.Context(), userID, &req)
 	if err != nil {
-		response.Error(c, 400, response.CodeGenFailed, err.Error())
+		api.Error(c, 400, api.CodeGenFailed, err.Error())
 		return
 	}
 
-	response.Accepted(c, resp)
+	api.Accepted(c, resp)
 }
 
 // GetGenerationStatus 查询生成状态
@@ -85,30 +85,30 @@ func (h *GenerationHandler) ProGenerate(c *gin.Context) {
 func (h *GenerationHandler) GetGenerationStatus(c *gin.Context) {
 	userID, err := GetUserID(c)
 	if err != nil {
-		response.Unauthorized(c, "")
+		api.Unauthorized(c, "")
 		return
 	}
 
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		response.BadRequest(c, "无效的 ID")
+		api.BadRequest(c, "无效的 ID")
 		return
 	}
 
 	record, err := h.genService.GetStatus(c.Request.Context(), id)
 	if err != nil {
-		response.NotFound(c, "记录不存在")
+		api.NotFound(c, "记录不存在")
 		return
 	}
 
 	// 验证归属
 	if record.UserID != userID {
-		response.Forbidden(c, "无权查看此记录")
+		api.Forbidden(c, "无权查看此记录")
 		return
 	}
 
-	statusResp := models.GenerationStatusResponse{
+	statusResp := api.GenerationStatusResponse{
 		RecordID:       record.ID,
 		Status:         record.Status,
 		Seed:           record.Seed,
@@ -127,5 +127,5 @@ func (h *GenerationHandler) GetGenerationStatus(c *gin.Context) {
 		statusResp.ImageURL = record.ImageURL
 	}
 
-	response.Success(c, statusResp)
+	api.Success(c, statusResp)
 }

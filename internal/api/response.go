@@ -1,4 +1,4 @@
-package response
+package api
 
 import (
 	"net/http"
@@ -8,36 +8,36 @@ import (
 
 // 错误码定义
 const (
-	CodeSuccess       = 0
-	CodeBadRequest    = 40000
-	CodeUnauthorized  = 40100
-	CodeTokenExpired  = 40101
-	CodeForbidden     = 40300
-	CodeNotFound      = 40400
-	CodeConflict      = 40900
-	CodeGenFailed     = 42000
-	CodeGenTimeout    = 42001
-	CodeGenBusy       = 42002
-	CodeRateLimited   = 42900
+	CodeSuccess         = 0
+	CodeBadRequest      = 40000
+	CodeUnauthorized    = 40100
+	CodeTokenExpired    = 40101
+	CodeForbidden       = 40300
+	CodeNotFound        = 40400
+	CodeConflict        = 40900
+	CodeGenFailed       = 42000
+	CodeGenTimeout      = 42001
+	CodeGenBusy         = 42002
+	CodeRateLimited     = 42900
 	CodeHistoryNotFound = 44000
-	CodeInternal      = 50000
+	CodeInternal        = 50000
 )
 
 // 错误码对应的默认消息
 var messages = map[int]string{
-	CodeSuccess:       "success",
-	CodeBadRequest:    "请求参数错误",
-	CodeUnauthorized:  "未认证或认证已过期",
-	CodeTokenExpired:  "Token 已过期",
-	CodeForbidden:     "无权限访问",
-	CodeNotFound:      "资源不存在",
-	CodeConflict:      "资源冲突",
-	CodeGenFailed:     "图片生成失败",
-	CodeGenTimeout:    "图片生成超时",
-	CodeGenBusy:       "生成队列繁忙，请稍后重试",
-	CodeRateLimited:   "请求过于频繁，请稍后重试",
+	CodeSuccess:         "success",
+	CodeBadRequest:      "请求参数错误",
+	CodeUnauthorized:    "未认证或认证已过期",
+	CodeTokenExpired:    "Token 已过期",
+	CodeForbidden:       "无权限访问",
+	CodeNotFound:        "资源不存在",
+	CodeConflict:        "资源冲突",
+	CodeGenFailed:       "图片生成失败",
+	CodeGenTimeout:      "图片生成超时",
+	CodeGenBusy:         "生成队列繁忙，请稍后重试",
+	CodeRateLimited:     "请求过于频繁，请稍后重试",
 	CodeHistoryNotFound: "记录不存在",
-	CodeInternal:      "服务器内部错误",
+	CodeInternal:        "服务器内部错误",
 }
 
 // Response 统一响应结构

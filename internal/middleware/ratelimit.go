@@ -1,12 +1,11 @@
 package middleware
 
 import (
+	"photo-web/internal/api"
 	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
-
-	"photo-web/pkg/response"
 )
 
 // RateLimiter 简单的令牌桶限流器
@@ -63,7 +62,7 @@ func (rl *RateLimiter) Handler() gin.HandlerFunc {
 		// 消费令牌
 		if v.tokens < 1 {
 			rl.mu.Unlock()
-			response.TooManyRequests(c, "")
+			api.TooManyRequests(c, "")
 			c.Abort()
 			return
 		}

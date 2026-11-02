@@ -1,4 +1,6 @@
-package models
+package api
+
+import "photo-web/internal/models"
 
 // --- 认证相关 DTO ---
 
@@ -75,11 +77,11 @@ type GenerationStatusResponse struct {
 
 // HistoryListResponse 历史列表响应
 type HistoryListResponse struct {
-	Records    []GenerationRecord `json:"records"`
-	Total      int64              `json:"total"`
-	Page       int                `json:"page"`
-	PageSize   int                `json:"page_size"`
-	TotalPages int                `json:"total_pages"`
+	Records    []models.GenerationRecord `json:"records"`
+	Total      int64                     `json:"total"`
+	Page       int                       `json:"page"`
+	PageSize   int                       `json:"page_size"`
+	TotalPages int                       `json:"total_pages"`
 }
 
 // PaginationQuery 分页请求参数

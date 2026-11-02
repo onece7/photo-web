@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"photo-web/internal/api"
 	"time"
 
 	"github.com/google/uuid"
@@ -45,7 +46,7 @@ func (s *GenerationService) GetActiveStyles(ctx context.Context) ([]models.Image
 }
 
 // GenerateSimple 普通模式生成：使用预设风格
-func (s *GenerationService) GenerateSimple(ctx context.Context, userID uint64, req *models.SimpleGenerateRequest) (*models.GenerateResponse, error) {
+func (s *GenerationService) GenerateSimple(ctx context.Context, userID uint64, req *api.SimpleGenerateRequest) (*api.GenerateResponse, error) {
 	// 获取风格
 	style, err := s.styleRepo.FindByID(ctx, req.StyleID)
 	if err != nil {
@@ -93,14 +94,14 @@ func (s *GenerationService) GenerateSimple(ctx context.Context, userID uint64, r
 	// 异步生成
 	go s.processGeneration(record.ID)
 
-	return &models.GenerateResponse{
+	return &api.GenerateResponse{
 		RecordID: record.ID,
 		Status:   models.StatusPending,
 	}, nil
 }
 
 // GeneratePro 专业模式生成：自定义参数
-func (s *GenerationService) GeneratePro(ctx context.Context, userID uint64, req *models.ProGenerateRequest) (*models.GenerateResponse, error) {
+func (s *GenerationService) GeneratePro(ctx context.Context, userID uint64, req *api.ProGenerateRequest) (*api.GenerateResponse, error) {
 	// 填充默认值
 	if req.Width == 0 {
 		req.Width = 512
@@ -143,7 +144,7 @@ func (s *GenerationService) GeneratePro(ctx context.Context, userID uint64, req 
 	// 异步生成
 	go s.processGeneration(record.ID)
 
-	return &models.GenerateResponse{
+	return &api.GenerateResponse{
 		RecordID: record.ID,
 		Status:   models.StatusPending,
 	}, nil

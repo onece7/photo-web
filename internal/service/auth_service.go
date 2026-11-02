@@ -7,6 +7,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"photo-web/internal/api"
+	jwtpkg "photo-web/internal/jwt"
+	redisCli "photo-web/internal/redis"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -15,8 +18,6 @@ import (
 	"photo-web/internal/config"
 	"photo-web/internal/models"
 	"photo-web/internal/repository"
-	jwtpkg "photo-web/pkg/jwt"
-	redisCli "photo-web/pkg/redis"
 )
 
 // AuthService 认证业务逻辑
@@ -36,7 +37,7 @@ func NewAuthService(userRepo repository.UserRepository, redis *redisCli.Client, 
 }
 
 // Register 用户注册
-func (s *AuthService) Register(ctx context.Context, req *models.RegisterRequest) (*models.LoginResponse, error) {
+func (s *AuthService) Register(ctx context.Context, req *api.RegisterRequest) (*api.LoginResponse, error) {
 	// 检查用户名是否已存在
 	if _, err := s.userRepo.FindByUsername(ctx, req.Username); err == nil {
 		return nil, errors.New("用户名已存在")
@@ -68,7 +69,7 @@ func (s *AuthService) Register(ctx context.Context, req *models.RegisterRequest)
 }
 
 // Login 用户登录
-func (s *AuthService) Login(ctx context.Context, req *models.LoginRequest) (*models.LoginResponse, error) {
+func (s *AuthService) Login(ctx context.Context, req *api.LoginRequest) (*api.LoginResponse, error) {
 	// 查找用户
 	user, err := s.userRepo.FindByUsername(ctx, req.Username)
 	if err != nil {
@@ -87,7 +88,7 @@ func (s *AuthService) Login(ctx context.Context, req *models.LoginRequest) (*mod
 }
 
 // RefreshToken 刷新 Token
-func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*models.LoginResponse, error) {
+func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*api.LoginResponse, error) {
 	// 计算 refresh token hash
 	hash := hashToken(refreshToken)
 	key := fmt.Sprintf("refresh:%s", hash)
@@ -145,7 +146,7 @@ func (s *AuthService) IsTokenBlacklisted(ctx context.Context, token string) bool
 }
 
 // generateTokenPair 生成 Token 对
-func (s *AuthService) generateTokenPair(ctx context.Context, userID uint64, username string) (*models.LoginResponse, error) {
+func (s *AuthService) generateTokenPair(ctx context.Context, userID uint64, username string) (*api.LoginResponse, error) {
 	// 生成 Access Token
 	accessToken, expiresIn, err := s.jwt.GenerateAccessToken(userID, username)
 	if err != nil {
@@ -164,7 +165,7 @@ func (s *AuthService) generateTokenPair(ctx context.Context, userID uint64, user
 		return nil, fmt.Errorf("存储 Refresh Token 失败: %w", err)
 	}
 
-	return &models.LoginResponse{
+	return &api.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    expiresIn,

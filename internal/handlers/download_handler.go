@@ -3,11 +3,10 @@ package handlers
 import (
 	"os"
 	"path/filepath"
+	"photo-web/internal/api"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-
-	"photo-web/pkg/response"
 )
 
 // ServeGeneratedFile 提供生成的图片文件
@@ -21,7 +20,7 @@ func ServeGeneratedFile(uploadDir string) gin.HandlerFunc {
 		if cleanPath == "." ||
 			cleanPath == ".." ||
 			strings.HasPrefix(cleanPath, ".."+string(os.PathSeparator)) {
-			response.BadRequest(c, "无效的文件路径")
+			api.BadRequest(c, "无效的文件路径")
 			return
 		}
 

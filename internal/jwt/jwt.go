@@ -16,9 +16,9 @@ type Claims struct {
 
 // Manager JWT 管理器
 type Manager struct {
-	secret        []byte
-	accessTTL     time.Duration
-	refreshTTL    time.Duration
+	secret     []byte
+	accessTTL  time.Duration
+	refreshTTL time.Duration
 }
 
 // NewManager 创建 JWT 管理器

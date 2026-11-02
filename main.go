@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"photo-web/internal/api"
 	"photo-web/internal/bootstrap"
 	"photo-web/internal/migration"
+	"photo-web/internal/redis"
 	"syscall"
 	"time"
 
@@ -17,8 +19,6 @@ import (
 	"photo-web/internal/repository"
 	"photo-web/internal/router"
 	"photo-web/internal/service"
-	"photo-web/pkg/redis"
-	"photo-web/pkg/response"
 )
 
 func main() {
@@ -49,7 +49,7 @@ func main() {
 	}
 
 	// 初始化统一响应
-	response.Init()
+	api.Init()
 
 	// 依赖注入 - Repository 层
 	userRepo := repository.NewUserRepository(db)
@@ -95,4 +95,3 @@ func main() {
 	}
 	fmt.Println("服务已安全关闭")
 }
-

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"photo-web/internal/api"
 
 	"photo-web/internal/models"
 	"photo-web/internal/repository"
@@ -21,7 +22,7 @@ func NewHistoryService(genRepo repository.GenerationRepository) *HistoryService 
 }
 
 // GetHistory 获取用户历史列表 (分页)
-func (s *HistoryService) GetHistory(ctx context.Context, userID uint64, page, pageSize int) (*models.HistoryListResponse, error) {
+func (s *HistoryService) GetHistory(ctx context.Context, userID uint64, page, pageSize int) (*api.HistoryListResponse, error) {
 	records, total, err := s.genRepo.FindByUserID(ctx, userID, page, pageSize)
 	if err != nil {
 		return nil, fmt.Errorf("查询历史记录失败: %w", err)
@@ -32,7 +33,7 @@ func (s *HistoryService) GetHistory(ctx context.Context, userID uint64, page, pa
 		totalPages++
 	}
 
-	return &models.HistoryListResponse{
+	return &api.HistoryListResponse{
 		Records:    records,
 		Total:      total,
 		Page:       page,

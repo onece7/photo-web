@@ -3,14 +3,14 @@ package middleware
 import (
 	"errors"
 	"net/http"
+	"photo-web/internal/api"
+	"photo-web/internal/jwt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 
 	"photo-web/internal/service"
-	"photo-web/pkg/jwt"
-	"photo-web/pkg/response"
 )
 
 // AuthRequired 认证中间件：验证 JWT Token
@@ -19,14 +19,14 @@ func AuthRequired(authService *service.AuthService, jwtManager *jwt.Manager) gin
 		// 提取 Bearer Token
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			response.Error(c, http.StatusUnauthorized, response.CodeUnauthorized, "请先登录")
+			api.Error(c, http.StatusUnauthorized, api.CodeUnauthorized, "请先登录")
 			c.Abort()
 			return
 		}
 
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
-			response.Error(c, http.StatusUnauthorized, response.CodeUnauthorized, "Token 格式错误")
+			api.Error(c, http.StatusUnauthorized, api.CodeUnauthorized, "Token 格式错误")
 			c.Abort()
 			return
 		}
@@ -34,7 +34,7 @@ func AuthRequired(authService *service.AuthService, jwtManager *jwt.Manager) gin
 
 		// 检查黑名单
 		if authService.IsTokenBlacklisted(c.Request.Context(), tokenString) {
-			response.Error(c, http.StatusUnauthorized, response.CodeTokenExpired, "Token 已失效")
+			api.Error(c, http.StatusUnauthorized, api.CodeTokenExpired, "Token 已失效")
 			c.Abort()
 			return
 		}
@@ -43,9 +43,9 @@ func AuthRequired(authService *service.AuthService, jwtManager *jwt.Manager) gin
 		claims, err := jwtManager.ParseAccessToken(tokenString)
 		if err != nil {
 			if errors.Is(err, jwtv5.ErrTokenExpired) {
-				response.Error(c, http.StatusUnauthorized, response.CodeTokenExpired, "Token 已过期")
+				api.Error(c, http.StatusUnauthorized, api.CodeTokenExpired, "Token 已过期")
 			} else {
-				response.Error(c, http.StatusUnauthorized, response.CodeUnauthorized, "Token 无效")
+				api.Error(c, http.StatusUnauthorized, api.CodeUnauthorized, "Token 无效")
 			}
 			c.Abort()
 			return
