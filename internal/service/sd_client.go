@@ -67,7 +67,7 @@ func NewSDClient(cfg *config.Config) *sdClient {
 	case "a1111":
 		c.provider = newA1111Provider(
 			cfg.SD.BaseURL,
-			time.Duration(cfg.SD.MockDelayMs)*time.Second,
+			time.Duration(cfg.SD.RequestTimeout)*time.Second,
 		)
 	case "replicate":
 		c.provider = &replicateProvider{apiKey: cfg.SD.APIKey}
@@ -75,7 +75,10 @@ func NewSDClient(cfg *config.Config) *sdClient {
 		if cfg.SD.APIKey != "" {
 			c.provider = &replicateProvider{apiKey: cfg.SD.APIKey}
 		} else if cfg.SD.BaseURL != "" {
-			c.provider = &a1111Provider{baseURL: cfg.SD.BaseURL}
+			c.provider = newA1111Provider(
+				cfg.SD.BaseURL,
+				time.Duration(cfg.SD.RequestTimeout)*time.Second,
+			)
 		}
 	}
 
