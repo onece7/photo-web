@@ -49,7 +49,7 @@ type ProGenerateRequest struct {
 	Height         int     `json:"height" binding:"min=64,max=2048"`
 	CFGScale       float64 `json:"cfg_scale" binding:"min=1,max=30"`
 	Steps          int     `json:"steps" binding:"min=1,max=150"`
-	Sampler        string  `json:"sampler"`
+	Sampler        string  `json:"sampler" binding:"omitempty,max=64"`
 	Seed           int64   `json:"seed"`
 }
 

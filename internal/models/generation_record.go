@@ -24,19 +24,19 @@ const (
 // GenerationRecord 生成记录模型
 type GenerationRecord struct {
 	ID             uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	UserID         uuid.UUID      `gorm:"index;not null;default:gen_random_uuid()" json:"user_id"`
+	UserID         uuid.UUID      `gorm:"index;not null" json:"user_id"`
 	Mode           string         `gorm:"not null" json:"mode"`
 	Prompt         string         `gorm:"type:text;not null" json:"prompt"`
 	NegativePrompt string         `gorm:"type:text" json:"negative_prompt"`
-	StyleID        *uuid.UUID     `gorm:"default:null;gen_random_uuid()" json:"style_id"`
+	StyleID        *uuid.UUID     `gorm:"default:null" json:"style_id"`
 	Width          int            `gorm:"default:512" json:"width"`
 	Height         int            `gorm:"default:512" json:"height"`
 	CFGScale       float64        `gorm:"default:7.0" json:"cfg_scale"`
 	Steps          int            `gorm:"default:20" json:"steps"`
-	Sampler        string         `gorm:"type:varchar(64);default:'Euler a'" json:"sampler"`
+	Sampler        string         `gorm:"type:text;default:'Euler a'" json:"sampler"`
 	Seed           int64          `gorm:"default:-1" json:"seed"`
-	ImageURL       string         `gorm:"type:varchar(512)" json:"image_url"`
-	ThumbnailURL   string         `gorm:"type:varchar(512)" json:"thumbnail_url"`
+	ImageURL       string         `gorm:"type:text" json:"image_url"`
+	ThumbnailURL   string         `gorm:"type:text" json:"thumbnail_url"`
 	Status         string         `gorm:"default:'pending'" json:"status"`
 	ErrorMessage   string         `gorm:"type:text" json:"error_message"`
 	DurationMs     int64          `gorm:"default:0" json:"duration_ms"`
