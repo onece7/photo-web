@@ -47,9 +47,6 @@ type Response struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
-// Init 初始化 (可扩展)
-func Init() {}
-
 // Success 成功响应
 func Success(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusOK, Response{

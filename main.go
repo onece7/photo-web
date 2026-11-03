@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"photo-web/internal/api"
 	"photo-web/internal/bootstrap"
 	"photo-web/internal/migration"
 	"photo-web/internal/redis"
@@ -57,9 +56,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("连接 Redis 失败: %v", err)
 	}
-
-	// 初始化统一响应
-	api.Init()
 
 	// 依赖注入 - Repository 层
 	userRepo := repository.NewUserRepository(db)
