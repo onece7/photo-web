@@ -28,12 +28,12 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 func (r *userRepo) Create(ctx context.Context, user *models.User) error {
-	err := gorm.G[models.User](r.db).Create(ctx, user)
-	return err
+	return r.db.WithContext(ctx).Create(user).Error
 }
 
 func (r *userRepo) FindByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
-	user, err := gorm.G[models.User](r.db).Where("id = ?", id).First(ctx)
+	var user models.User
+	err := r.db.WithContext(ctx).First(&user, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,8 @@ func (r *userRepo) FindByID(ctx context.Context, id uuid.UUID) (*models.User, er
 }
 
 func (r *userRepo) FindByUsername(ctx context.Context, username string) (*models.User, error) {
-	user, err := gorm.G[models.User](r.db).Where("username = ?", username).First(ctx)
+	var user models.User
+	err := r.db.WithContext(ctx).First(&user, "username = ?", username).Error
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,8 @@ func (r *userRepo) FindByUsername(ctx context.Context, username string) (*models
 }
 
 func (r *userRepo) FindByPhone(ctx context.Context, phone string) (*models.User, error) {
-	user, err := gorm.G[models.User](r.db).Where("phone = ?", phone).First(ctx)
+	var user models.User
+	err := r.db.WithContext(ctx).First(&user, "phone = ?", phone).Error
 	if err != nil {
 		return nil, err
 	}
@@ -57,6 +59,8 @@ func (r *userRepo) FindByPhone(ctx context.Context, phone string) (*models.User,
 }
 
 func (r *userRepo) Update(ctx context.Context, user models.User) error {
-	_, err := gorm.G[models.User](r.db).Where("id = ?", user.ID).Select("*").Updates(ctx, user)
-	return err
+	return r.db.WithContext(ctx).
+		Where("id = ?", user.ID).
+		Select("*").
+		Updates(&user).Error
 }
