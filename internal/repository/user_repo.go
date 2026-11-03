@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"photo-web/internal/models"
@@ -11,7 +12,7 @@ import (
 // UserRepository 用户数据访问接口
 type UserRepository interface {
 	Create(ctx context.Context, user *models.User) error
-	FindByID(ctx context.Context, id uint64) (*models.User, error)
+	FindByID(ctx context.Context, id uuid.UUID) (*models.User, error)
 	FindByUsername(ctx context.Context, username string) (*models.User, error)
 	FindByPhone(ctx context.Context, phone string) (*models.User, error)
 	Update(ctx context.Context, user models.User) error
@@ -31,7 +32,7 @@ func (r *userRepo) Create(ctx context.Context, user *models.User) error {
 	return err
 }
 
-func (r *userRepo) FindByID(ctx context.Context, id uint64) (*models.User, error) {
+func (r *userRepo) FindByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	user, err := gorm.G[models.User](r.db).Where("id = ?", id).First(ctx)
 	if err != nil {
 		return nil, err

@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 	"photo-web/internal/api"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"photo-web/internal/models"
 	"photo-web/internal/service"
@@ -90,7 +90,7 @@ func (h *GenerationHandler) GetGenerationStatus(c *gin.Context) {
 	}
 
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		api.BadRequest(c, "无效的 ID")
 		return

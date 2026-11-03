@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"photo-web/internal/service"
 )
@@ -112,14 +113,14 @@ func extractBearerToken(c *gin.Context) string {
 }
 
 // GetUserID 从 context 中获取当前用户 ID
-func GetUserID(c *gin.Context) (uint64, error) {
+func GetUserID(c *gin.Context) (uuid.UUID, error) {
 	userID, exists := c.Get("userID")
 	if !exists {
-		return 0, errors.New("未找到用户信息")
+		return uuid.Nil, errors.New("未找到用户信息")
 	}
-	id, ok := userID.(uint64)
+	id, ok := userID.(uuid.UUID)
 	if !ok {
-		return 0, errors.New("用户信息类型错误")
+		return uuid.Nil, errors.New("用户信息类型错误")
 	}
 	return id, nil
 }

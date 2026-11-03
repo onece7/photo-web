@@ -3,12 +3,13 @@ package models
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 // User 用户模型
 type User struct {
-	ID           uint64         `gorm:"primaryKey;autoIncrement" json:"id"`
+	ID           uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 	Username     string         `gorm:"type:varchar(64);uniqueIndex;not null" json:"username"`
 	Phone        string         `gorm:"type:varchar(20);uniqueIndex;not null" json:"phone"`
 	PasswordHash string         `gorm:"type:varchar(255);not null" json:"-"`

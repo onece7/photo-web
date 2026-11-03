@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -35,7 +36,7 @@ func (j JSONMap) Value() (driver.Value, error) {
 
 // ImageStyle 图片风格预设模型
 type ImageStyle struct {
-	ID           uint64         `gorm:"primaryKey;autoIncrement" json:"id"`
+	ID           uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 	Name         string         `gorm:"type:varchar(64);uniqueIndex;not null" json:"name"`
 	DisplayName  string         `gorm:"type:varchar(128);not null" json:"display_name"`
 	Description  string         `gorm:"type:text" json:"description"`

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"photo-web/internal/service"
 )
@@ -60,7 +61,7 @@ func (h *HistoryHandler) GetHistoryDetail(c *gin.Context) {
 		return
 	}
 
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		api.BadRequest(c, "无效的 ID")
 		return
@@ -84,7 +85,7 @@ func (h *HistoryHandler) DeleteHistory(c *gin.Context) {
 		return
 	}
 
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		api.BadRequest(c, "无效的 ID")
 		return

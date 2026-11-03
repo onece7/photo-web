@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"photo-web/internal/models"
@@ -12,7 +13,7 @@ import (
 type StyleRepository interface {
 	FindAll(ctx context.Context) ([]models.ImageStyle, error)
 	FindActive(ctx context.Context) ([]models.ImageStyle, error)
-	FindByID(ctx context.Context, id uint64) (*models.ImageStyle, error)
+	FindByID(ctx context.Context, id uuid.UUID) (*models.ImageStyle, error)
 	FindByName(ctx context.Context, name string) (*models.ImageStyle, error)
 }
 
@@ -35,7 +36,7 @@ func (r *styleRepo) FindActive(ctx context.Context) ([]models.ImageStyle, error)
 	return styles, err
 }
 
-func (r *styleRepo) FindByID(ctx context.Context, id uint64) (*models.ImageStyle, error) {
+func (r *styleRepo) FindByID(ctx context.Context, id uuid.UUID) (*models.ImageStyle, error) {
 	style, err := gorm.G[models.ImageStyle](r.db).Where("id = ?", id).First(ctx)
 	if err != nil {
 		return nil, err

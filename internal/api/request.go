@@ -1,6 +1,10 @@
 package api
 
-import "photo-web/internal/models"
+import (
+	"photo-web/internal/models"
+
+	"github.com/google/uuid"
+)
 
 // --- 认证相关 DTO ---
 
@@ -33,8 +37,8 @@ type RefreshRequest struct {
 
 // SimpleGenerateRequest 普通模式生成请求
 type SimpleGenerateRequest struct {
-	Prompt  string `json:"prompt" binding:"required,min=1,max=2000"`
-	StyleID uint64 `json:"style_id" binding:"required"`
+	Prompt  string    `json:"prompt" binding:"required,min=1,max=2000"`
+	StyleID uuid.UUID `json:"style_id" binding:"required"`
 }
 
 // ProGenerateRequest 专业模式生成请求
@@ -51,26 +55,26 @@ type ProGenerateRequest struct {
 
 // GenerateResponse 生成请求响应 (202)
 type GenerateResponse struct {
-	RecordID uint64 `json:"record_id"`
-	Status   string `json:"status"`
+	RecordID uuid.UUID `json:"record_id"`
+	Status   string    `json:"status"`
 }
 
 // GenerationStatusResponse 生成状态响应
 type GenerationStatusResponse struct {
-	RecordID       uint64  `json:"record_id"`
-	Status         string  `json:"status"`
-	ImageURL       string  `json:"image_url,omitempty"`
-	ThumbnailURL   string  `json:"thumbnail_url,omitempty"`
-	Seed           int64   `json:"seed,omitempty"`
-	DurationMs     int64   `json:"duration_ms,omitempty"`
-	ErrorMessage   string  `json:"error_message,omitempty"`
-	Prompt         string  `json:"prompt,omitempty"`
-	NegativePrompt string  `json:"negative_prompt,omitempty"`
-	Width          int     `json:"width,omitempty"`
-	Height         int     `json:"height,omitempty"`
-	CFGScale       float64 `json:"cfg_scale,omitempty"`
-	Steps          int     `json:"steps,omitempty"`
-	Sampler        string  `json:"sampler,omitempty"`
+	RecordID       uuid.UUID `json:"record_id"`
+	Status         string    `json:"status"`
+	ImageURL       string    `json:"image_url,omitempty"`
+	ThumbnailURL   string    `json:"thumbnail_url,omitempty"`
+	Seed           int64     `json:"seed,omitempty"`
+	DurationMs     int64     `json:"duration_ms,omitempty"`
+	ErrorMessage   string    `json:"error_message,omitempty"`
+	Prompt         string    `json:"prompt,omitempty"`
+	NegativePrompt string    `json:"negative_prompt,omitempty"`
+	Width          int       `json:"width,omitempty"`
+	Height         int       `json:"height,omitempty"`
+	CFGScale       float64   `json:"cfg_scale,omitempty"`
+	Steps          int       `json:"steps,omitempty"`
+	Sampler        string    `json:"sampler,omitempty"`
 }
 
 // --- 历史相关 DTO ---

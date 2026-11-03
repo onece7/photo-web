@@ -12,6 +12,7 @@ import (
 	redisCli "photo-web/internal/redis"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
@@ -103,13 +104,13 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*a
 	_ = s.redis.Del(ctx, key)
 
 	// 查找用户
-	var userID uint64
-	if _, err := fmt.Sscanf(userIDStr, "%d", &userID); err != nil {
-		return nil, errors.New("无效的 Refresh Token")
+	var userID uuid.UUID
+	if userID, err = uuid.Parse(userIDStr); err != nil {
+		return nil, err
 	}
 	user, err := s.userRepo.FindByID(ctx, userID)
 	if err != nil {
-		return nil, errors.New("用户不存在")
+		return nil, err
 	}
 
 	return s.generateTokenPair(ctx, user.ID, user.Username)
@@ -146,7 +147,7 @@ func (s *AuthService) IsTokenBlacklisted(ctx context.Context, token string) bool
 }
 
 // generateTokenPair 生成 Token 对
-func (s *AuthService) generateTokenPair(ctx context.Context, userID uint64, username string) (*api.LoginResponse, error) {
+func (s *AuthService) generateTokenPair(ctx context.Context, userID uuid.UUID, username string) (*api.LoginResponse, error) {
 	// 生成 Access Token
 	accessToken, expiresIn, err := s.jwt.GenerateAccessToken(userID, username)
 	if err != nil {
@@ -161,7 +162,7 @@ func (s *AuthService) generateTokenPair(ctx context.Context, userID uint64, user
 	refreshHash := hashToken(refreshToken)
 	key := fmt.Sprintf("refresh:%s", refreshHash)
 
-	if err := s.redis.Set(ctx, key, fmt.Sprintf("%d", userID), s.jwt.RefreshTokenTTL()); err != nil {
+	if err := s.redis.Set(ctx, key, fmt.Sprintf("%v", userID.String()), s.jwt.RefreshTokenTTL()); err != nil {
 		return nil, fmt.Errorf("存储 Refresh Token 失败: %w", err)
 	}
 

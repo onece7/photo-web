@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -22,12 +23,12 @@ const (
 
 // GenerationRecord 生成记录模型
 type GenerationRecord struct {
-	ID             uint64         `gorm:"primaryKey; autoIncrement" json:"id"`
-	UserID         uint64         `gorm:"index;not null" json:"user_id"`
+	ID             uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	UserID         uuid.UUID      `gorm:"index;not null;default:gen_random_uuid()" json:"user_id"`
 	Mode           string         `gorm:"not null" json:"mode"`
 	Prompt         string         `gorm:"type:text;not null" json:"prompt"`
 	NegativePrompt string         `gorm:"type:text" json:"negative_prompt"`
-	StyleID        *uint64        `gorm:"default:null" json:"style_id"`
+	StyleID        *uuid.UUID     `gorm:"default:null;gen_random_uuid()" json:"style_id"`
 	Width          int            `gorm:"default:512" json:"width"`
 	Height         int            `gorm:"default:512" json:"height"`
 	CFGScale       float64        `gorm:"default:7.0" json:"cfg_scale"`

@@ -9,6 +9,8 @@ import (
 
 	"photo-web/internal/models"
 	"photo-web/internal/repository"
+
+	"github.com/google/uuid"
 )
 
 // HistoryService 历史记录服务
@@ -22,7 +24,7 @@ func NewHistoryService(genRepo repository.GenerationRepository) *HistoryService 
 }
 
 // GetHistory 获取用户历史列表 (分页)
-func (s *HistoryService) GetHistory(ctx context.Context, userID uint64, page, pageSize int) (*api.HistoryListResponse, error) {
+func (s *HistoryService) GetHistory(ctx context.Context, userID uuid.UUID, page, pageSize int) (*api.HistoryListResponse, error) {
 	records, total, err := s.genRepo.FindByUserID(ctx, userID, page, pageSize)
 	if err != nil {
 		return nil, fmt.Errorf("查询历史记录失败: %w", err)
@@ -43,7 +45,7 @@ func (s *HistoryService) GetHistory(ctx context.Context, userID uint64, page, pa
 }
 
 // GetHistoryDetail 获取历史详情
-func (s *HistoryService) GetHistoryDetail(ctx context.Context, id, userID uint64) (models.GenerationRecord, error) {
+func (s *HistoryService) GetHistoryDetail(ctx context.Context, id, userID uuid.UUID) (models.GenerationRecord, error) {
 	record, err := s.genRepo.FindByID(ctx, id)
 	if err != nil {
 		return models.GenerationRecord{}, fmt.Errorf("记录不存在: %w", err)
@@ -58,7 +60,7 @@ func (s *HistoryService) GetHistoryDetail(ctx context.Context, id, userID uint64
 }
 
 // DeleteHistory 删除历史记录及图片文件
-func (s *HistoryService) DeleteHistory(ctx context.Context, id, userID uint64, uploadDir string) error {
+func (s *HistoryService) DeleteHistory(ctx context.Context, id, userID uuid.UUID, uploadDir string) error {
 	// 先查记录确认归属
 	record, err := s.genRepo.FindByID(ctx, id)
 	if err != nil {

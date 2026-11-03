@@ -5,12 +5,13 @@ import (
 	"time"
 
 	jwtv5 "github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 // Claims JWT 声明
 type Claims struct {
-	UserID   uint64 `json:"user_id"`
-	Username string `json:"username"`
+	UserID   uuid.UUID `json:"user_id"`
+	Username string    `json:"username"`
 	jwtv5.RegisteredClaims
 }
 
@@ -31,7 +32,7 @@ func NewManager(secret string, accessTTLMinutes, refreshTTLHours int) *Manager {
 }
 
 // GenerateAccessToken 生成访问令牌
-func (m *Manager) GenerateAccessToken(userID uint64, username string) (string, int64, error) {
+func (m *Manager) GenerateAccessToken(userID uuid.UUID, username string) (string, int64, error) {
 	now := time.Now()
 	expiresAt := now.Add(m.accessTTL)
 	claims := Claims{

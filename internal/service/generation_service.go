@@ -50,7 +50,7 @@ func (s *GenerationService) GetActiveStyles(ctx context.Context) ([]models.Image
 }
 
 // GenerateSimple 普通模式生成：使用预设风格
-func (s *GenerationService) GenerateSimple(ctx context.Context, userID uint64, req *api.SimpleGenerateRequest) (*api.GenerateResponse, error) {
+func (s *GenerationService) GenerateSimple(ctx context.Context, userID uuid.UUID, req *api.SimpleGenerateRequest) (*api.GenerateResponse, error) {
 	// 获取风格
 	style, err := s.styleRepo.FindByID(ctx, req.StyleID)
 	if err != nil {
@@ -105,7 +105,7 @@ func (s *GenerationService) GenerateSimple(ctx context.Context, userID uint64, r
 }
 
 // GeneratePro 专业模式生成：自定义参数
-func (s *GenerationService) GeneratePro(ctx context.Context, userID uint64, req *api.ProGenerateRequest) (*api.GenerateResponse, error) {
+func (s *GenerationService) GeneratePro(ctx context.Context, userID uuid.UUID, req *api.ProGenerateRequest) (*api.GenerateResponse, error) {
 	// 填充默认值
 	if req.Width == 0 {
 		req.Width = 512
@@ -155,12 +155,12 @@ func (s *GenerationService) GeneratePro(ctx context.Context, userID uint64, req 
 }
 
 // GetStatus 查询生成状态
-func (s *GenerationService) GetStatus(ctx context.Context, id uint64) (models.GenerationRecord, error) {
+func (s *GenerationService) GetStatus(ctx context.Context, id uuid.UUID) (models.GenerationRecord, error) {
 	return s.genRepo.FindByID(ctx, id)
 }
 
 // processGeneration 后台生成流程
-func (s *GenerationService) processGeneration(recordID uint64) {
+func (s *GenerationService) processGeneration(recordID uuid.UUID) {
 	// 并发控制
 	s.sem <- struct{}{}
 	defer func() { <-s.sem }()
@@ -232,9 +232,9 @@ func (s *GenerationService) processGeneration(recordID uint64) {
 }
 
 // saveGeneratedImage 保存生成的图片到本地
-func saveGeneratedImage(uploadDir string, userID, recordID uint64, imageData []byte) (string, error) {
+func saveGeneratedImage(uploadDir string, userID, recordID uuid.UUID, imageData []byte) (string, error) {
 	// 确保目录存在
-	dir := filepath.Join(uploadDir, fmt.Sprintf("%d", userID))
+	dir := filepath.Join(uploadDir, fmt.Sprintf("%v", userID.String()))
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return "", err
 	}
@@ -248,5 +248,5 @@ func saveGeneratedImage(uploadDir string, userID, recordID uint64, imageData []b
 	}
 
 	// 返回相对路径
-	return filepath.Join(fmt.Sprintf("%d", userID), filename), nil
+	return filepath.Join(fmt.Sprintf("%v", userID.String()), filename), nil
 }
