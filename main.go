@@ -44,7 +44,10 @@ func main() {
 	}
 
 	// 自动迁移数据库
-	migration.Migrate(db)
+	err = migration.Migrate(db)
+	if err != nil {
+		log.Fatalf("数据库迁移失败: %v", err)
+	}
 
 	// 生成种子风格
 	migration.SeedStyles(db, logger)

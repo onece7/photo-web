@@ -1,22 +1,23 @@
 package migration
 
 import (
-	"log"
+	"fmt"
 	"log/slog"
 	"photo-web/internal/models"
 
 	"gorm.io/gorm"
 )
 
-func Migrate(db *gorm.DB) {
+func Migrate(db *gorm.DB) error {
 	// 自动迁移
 	if err := db.AutoMigrate(
 		&models.User{},
 		&models.ImageStyle{},
 		&models.GenerationRecord{},
 	); err != nil {
-		log.Fatalf("数据库迁移失败: %v", err)
+		return fmt.Errorf("数据库迁移失败：%w", err)
 	}
+	return nil
 }
 
 func SeedStyles(db *gorm.DB, logger *slog.Logger) {

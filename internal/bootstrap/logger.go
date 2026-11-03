@@ -22,6 +22,8 @@ func NewLogger(cfg *config.Config, output io.Writer) (*slog.Logger, error) {
 		handler = slog.NewTextHandler(output, opt)
 	case "json":
 		handler = slog.NewJSONHandler(output, opt)
+	default:
+		return nil, fmt.Errorf("invalid logger format: %s", cfg.Logger.Format)
 	}
 
 	logger := slog.New(handler).With(slog.String("env", cfg.Server.Mode))

@@ -65,7 +65,10 @@ func NewSDClient(cfg *config.Config) *sdClient {
 			delay: time.Duration(cfg.SD.MockDelayMs) * time.Millisecond,
 		}
 	case "a1111":
-		c.provider = &a1111Provider{baseURL: cfg.SD.BaseURL}
+		c.provider = newA1111Provider(
+			cfg.SD.BaseURL,
+			time.Duration(cfg.SD.MockDelayMs)*time.Second,
+		)
 	case "replicate":
 		c.provider = &replicateProvider{apiKey: cfg.SD.APIKey}
 	case "":
@@ -160,6 +163,7 @@ func stableIndex(params *GenerateParams, size int) int {
 
 type a1111Provider struct {
 	baseURL string
+	client  *http.Client
 }
 
 // a1111Request A1111 txt2img 请求结构
@@ -179,6 +183,22 @@ type a1111Response struct {
 	Images     []string               `json:"images"` // base64 编码的图片
 	Parameters map[string]interface{} `json:"parameters"`
 	Info       string                 `json:"info"`
+}
+
+func newA1111Provider(baseURL string, timeout time.Duration) *a1111Provider {
+	if timeout <= 0 {
+		timeout = 300 * time.Second
+	}
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.MaxConnsPerHost = 5
+	transport.IdleConnTimeout = 90 * time.Second
+	return &a1111Provider{
+		baseURL: baseURL,
+		client: &http.Client{
+			Transport: transport,
+			Timeout:   timeout,
+		},
+	}
 }
 
 func (p *a1111Provider) Generate(ctx context.Context, params *GenerateParams) (*GenerateResult, error) {
@@ -205,10 +225,9 @@ func (p *a1111Provider) Generate(ctx context.Context, params *GenerateParams) (*
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 300 * time.Second}
-	resp, err := client.Do(req)
+	resp, err := p.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("请求 SD API 失败: %w", err)
+		return nil, fmt.Errorf("请求SD API失败: %w", err)
 	}
 	defer resp.Body.Close()
 

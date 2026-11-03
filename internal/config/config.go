@@ -97,15 +97,15 @@ var config = &Config{}
 
 // Load 加载配置
 func Load(path string) (*Config, error) {
-	once.Do(func() {
-		conf, err := os.ReadFile(path)
-		if err != nil {
-			log.Fatalln("read config file error:", err)
-		}
-		if err := yaml.Unmarshal(conf, config); err != nil {
-			log.Fatalln("unmarshal config file error:", err)
-		}
-	})
+
+	conf, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("read config file error, %s", err.Error())
+	}
+	if err := yaml.Unmarshal(conf, config); err != nil {
+		return nil, fmt.Errorf("unmarshal config file error, %s", err.Error())
+	}
+
 	return config, nil
 }
 
