@@ -1,7 +1,7 @@
 package api
 
 import (
-	"photo-web/internal/models"
+	"photo-web/models"
 
 	"github.com/google/uuid"
 )

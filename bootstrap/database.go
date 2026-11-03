@@ -1,7 +1,7 @@
 package bootstrap
 
 import (
-	"photo-web/internal/config"
+	"photo-web/config"
 	"time"
 
 	"gorm.io/driver/postgres"

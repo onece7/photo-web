@@ -1,13 +1,12 @@
 package handlers
 
 import (
-	"photo-web/internal/api"
+	"photo-web/api"
+	"photo-web/service"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
-	"photo-web/internal/service"
 )
 
 // HistoryHandler 历史记录处理器

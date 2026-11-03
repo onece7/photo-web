@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"photo-web/internal/api"
-
-	"photo-web/internal/models"
-	"photo-web/internal/repository"
+	"photo-web/api"
+	"photo-web/models"
+	"photo-web/repository"
 
 	"github.com/google/uuid"
 )

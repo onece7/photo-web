@@ -3,7 +3,7 @@ package handlers
 import (
 	"os"
 	"path/filepath"
-	"photo-web/internal/api"
+	"photo-web/api"
 	"strings"
 
 	"github.com/gin-gonic/gin"

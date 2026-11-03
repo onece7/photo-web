@@ -7,25 +7,23 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"photo-web/internal/api"
-	jwtpkg "photo-web/internal/jwt"
-	redisCli "photo-web/internal/redis"
+	"photo-web/api"
+	"photo-web/config"
+	redisCli "photo-web/middleware"
+	"photo-web/models"
+	"photo-web/repository"
 	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-
-	"photo-web/internal/config"
-	"photo-web/internal/models"
-	"photo-web/internal/repository"
 )
 
 // AuthService 认证业务逻辑
 type AuthService struct {
 	userRepo repository.UserRepository
 	redis    *redisCli.Client
-	jwt      *jwtpkg.Manager
+	jwt      *redisCli.Manager
 }
 
 // NewAuthService 创建认证 Service
@@ -33,7 +31,7 @@ func NewAuthService(userRepo repository.UserRepository, redis *redisCli.Client, 
 	return &AuthService{
 		userRepo: userRepo,
 		redis:    redis,
-		jwt:      jwtpkg.NewManager(cfg.JWT.Secret, cfg.JWT.AccessTokenTTL, cfg.JWT.RefreshTokenTTL),
+		jwt:      redisCli.NewManager(cfg.JWT.Secret, cfg.JWT.AccessTokenTTL, cfg.JWT.RefreshTokenTTL),
 	}
 }
 

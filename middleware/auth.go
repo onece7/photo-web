@@ -3,18 +3,16 @@ package middleware
 import (
 	"errors"
 	"net/http"
-	"photo-web/internal/api"
-	"photo-web/internal/jwt"
+	"photo-web/api"
+	"photo-web/service"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
-
-	"photo-web/internal/service"
 )
 
 // AuthRequired 认证中间件：验证 JWT Token
-func AuthRequired(authService *service.AuthService, jwtManager *jwt.Manager) gin.HandlerFunc {
+func AuthRequired(authService *service.AuthService, jwtManager *Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 提取 Bearer Token
 		authHeader := c.GetHeader("Authorization")

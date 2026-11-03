@@ -2,11 +2,10 @@ package repository
 
 import (
 	"context"
+	"photo-web/models"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-
-	"photo-web/internal/models"
 )
 
 // UserRepository 用户数据访问接口

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"photo-web/internal/config"
+	"photo-web/config"
 	"strings"
 )
 

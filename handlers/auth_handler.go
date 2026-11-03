@@ -2,13 +2,12 @@ package handlers
 
 import (
 	"errors"
-	"photo-web/internal/api"
+	api2 "photo-web/api"
+	"photo-web/service"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
-	"photo-web/internal/service"
 )
 
 // AuthHandler 认证处理器
@@ -24,55 +23,55 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 // Register 用户注册
 // POST /api/v1/auth/register
 func (h *AuthHandler) Register(c *gin.Context) {
-	var req api.RegisterRequest
+	var req api2.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		api.BadRequest(c, "请输入有效的用户名、手机号和密码")
+		api2.BadRequest(c, "请输入有效的用户名、手机号和密码")
 		return
 	}
 
 	resp, err := h.authService.Register(c.Request.Context(), &req)
 	if err != nil {
-		api.Conflict(c, err.Error())
+		api2.Conflict(c, err.Error())
 		return
 	}
 
-	api.Created(c, resp)
+	api2.Created(c, resp)
 }
 
 // Login 用户登录
 // POST /api/v1/auth/login
 func (h *AuthHandler) Login(c *gin.Context) {
-	var req api.LoginRequest
+	var req api2.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		api.BadRequest(c, "请输入用户名和密码")
+		api2.BadRequest(c, "请输入用户名和密码")
 		return
 	}
 
 	resp, err := h.authService.Login(c.Request.Context(), &req)
 	if err != nil {
-		api.Unauthorized(c, err.Error())
+		api2.Unauthorized(c, err.Error())
 		return
 	}
 
-	api.Success(c, resp)
+	api2.Success(c, resp)
 }
 
 // RefreshToken 刷新 Token
 // POST /api/v1/auth/refresh
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
-	var req api.RefreshRequest
+	var req api2.RefreshRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		api.BadRequest(c, "请提供 Refresh Token")
+		api2.BadRequest(c, "请提供 Refresh Token")
 		return
 	}
 
 	resp, err := h.authService.RefreshToken(c.Request.Context(), req.RefreshToken)
 	if err != nil {
-		api.Unauthorized(c, err.Error())
+		api2.Unauthorized(c, err.Error())
 		return
 	}
 
-	api.Success(c, resp)
+	api2.Success(c, resp)
 }
 
 // Logout 登出
@@ -81,22 +80,22 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	// 从 Authorization Header 获取 Access Token
 	accessToken := extractBearerToken(c)
 	if accessToken == "" {
-		api.BadRequest(c, "未提供 Token")
+		api2.BadRequest(c, "未提供 Token")
 		return
 	}
 
 	var refreshToken string
-	var req api.RefreshRequest
+	var req api2.RefreshRequest
 	if err := c.ShouldBindJSON(&req); err == nil {
 		refreshToken = req.RefreshToken
 	}
 
 	if err := h.authService.Logout(c.Request.Context(), accessToken, refreshToken); err != nil {
-		api.InternalError(c, err.Error())
+		api2.InternalError(c, err.Error())
 		return
 	}
 
-	api.Success(c, nil)
+	api2.Success(c, nil)
 }
 
 // extractBearerToken 从 Authorization Header 提取 Bearer Token

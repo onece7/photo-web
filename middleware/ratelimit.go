@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"photo-web/internal/api"
+	"photo-web/api"
 	"sync"
 	"time"
 

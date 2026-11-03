@@ -1,13 +1,12 @@
-package redis
+package middleware
 
 import (
 	"context"
 	"fmt"
+	"photo-web/config"
 	"time"
 
 	"github.com/redis/go-redis/v9"
-
-	"photo-web/internal/config"
 )
 
 // Client Redis 客户端封装
