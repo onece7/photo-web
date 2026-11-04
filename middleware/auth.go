@@ -1,18 +1,22 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"photo-web/api"
-	"photo-web/service"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 )
 
+type TokenStatusChecker interface {
+	IsTokenBlacklisted(ctx context.Context, token string) bool
+}
+
 // AuthRequired 认证中间件：验证 JWT Token
-func AuthRequired(authService *service.AuthService, jwtManager *Manager) gin.HandlerFunc {
+func AuthRequired(tokenChecker TokenStatusChecker, jwtManager *Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 提取 Bearer Token
 		authHeader := c.GetHeader("Authorization")
@@ -31,7 +35,7 @@ func AuthRequired(authService *service.AuthService, jwtManager *Manager) gin.Han
 		tokenString := parts[1]
 
 		// 检查黑名单
-		if authService.IsTokenBlacklisted(c.Request.Context(), tokenString) {
+		if tokenChecker.IsTokenBlacklisted(c.Request.Context(), tokenString) {
 			api.Error(c, http.StatusUnauthorized, api.CodeTokenExpired, "Token 已失效")
 			c.Abort()
 			return
