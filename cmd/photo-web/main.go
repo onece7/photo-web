@@ -40,15 +40,6 @@ func main() {
 		log.Fatalf("连接数据库失败: %v", err)
 	}
 
-	// 自动迁移数据库
-	err = repository2.Migrate(db)
-	if err != nil {
-		log.Fatalf("数据库迁移失败: %v", err)
-	}
-
-	// 生成种子风格
-	repository2.SeedStyles(db, logger)
-
 	// 初始化 Redis
 	rdb, err := middleware2.NewClient(cfg)
 	if err != nil {

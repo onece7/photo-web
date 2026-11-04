@@ -1,35 +1,14 @@
-package repository
+package main
 
 import (
 	"fmt"
-	"log/slog"
 	models2 "photo-web/models"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
-func Migrate(db *gorm.DB) error {
-	// 自动迁移
-	if err := db.AutoMigrate(
-		&models2.User{},
-		&models2.ImageStyle{},
-		&models2.GenerationRecord{},
-	); err != nil {
-		return fmt.Errorf("数据库迁移失败：%w", err)
-	}
-	return nil
-}
-
-func SeedStyles(db *gorm.DB, logger *slog.Logger) {
-	var count int64
-	if err := db.Model(&models2.ImageStyle{}).Count(&count).Error; err != nil {
-		logger.Error("检查风格数据失败", slog.String("err", err.Error()))
-		return
-	}
-
-	if count > 0 {
-		return
-	}
+func SeedStyles(db *gorm.DB) error {
 
 	styles := []models2.ImageStyle{
 		{
@@ -63,9 +42,15 @@ func SeedStyles(db *gorm.DB, logger *slog.Logger) {
 			SortOrder:    6, IsActive: true,
 		},
 	}
-	if err := db.Create(&styles).Error; err != nil {
-		logger.Error("插入风格种子失败", slog.String("err", err.Error()))
-		return
+
+	result := db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "name"}},
+		DoNothing: true,
+	}).Create(&styles)
+
+	if result.Error != nil {
+		return fmt.Errorf("插入风格种子失败: %w", result.Error)
 	}
-	logger.Info("已插入6条预设风格种子")
+
+	return nil
 }
