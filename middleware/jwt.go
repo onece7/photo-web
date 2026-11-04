@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	jwtv5 "github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -12,7 +12,7 @@ import (
 type Claims struct {
 	UserID   uuid.UUID `json:"user_id"`
 	Username string    `json:"username"`
-	jwtv5.RegisteredClaims
+	jwt.RegisteredClaims
 }
 
 // Manager JWT 管理器
@@ -38,13 +38,13 @@ func (m *Manager) GenerateAccessToken(userID uuid.UUID, username string) (string
 	claims := Claims{
 		UserID:   userID,
 		Username: username,
-		RegisteredClaims: jwtv5.RegisteredClaims{
-			IssuedAt:  jwtv5.NewNumericDate(now),
-			ExpiresAt: jwtv5.NewNumericDate(expiresAt),
+		RegisteredClaims: jwt.RegisteredClaims{
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
 		},
 	}
 
-	token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := token.SignedString(m.secret)
 	if err != nil {
 		return "", 0, err
@@ -55,8 +55,8 @@ func (m *Manager) GenerateAccessToken(userID uuid.UUID, username string) (string
 
 // ParseAccessToken 解析访问令牌
 func (m *Manager) ParseAccessToken(tokenString string) (*Claims, error) {
-	token, err := jwtv5.ParseWithClaims(tokenString, &Claims{}, func(token *jwtv5.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwtv5.SigningMethodHMAC); !ok {
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("无效的签名算法")
 		}
 		return m.secret, nil

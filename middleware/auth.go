@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	jwtv5 "github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type TokenStatusChecker interface {
@@ -44,7 +44,7 @@ func AuthRequired(tokenChecker TokenStatusChecker, jwtManager *Manager) gin.Hand
 		// 解析 Token
 		claims, err := jwtManager.ParseAccessToken(tokenString)
 		if err != nil {
-			if errors.Is(err, jwtv5.ErrTokenExpired) {
+			if errors.Is(err, jwt.ErrTokenExpired) {
 				api.Error(c, http.StatusUnauthorized, api.CodeTokenExpired, "Token 已过期")
 			} else {
 				api.Error(c, http.StatusUnauthorized, api.CodeUnauthorized, "Token 无效")

@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"photo-web/api"
 	"photo-web/config"
-	models2 "photo-web/models"
-	repository2 "photo-web/repository"
+	"photo-web/models"
+	"photo-web/repository"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,8 +17,8 @@ import (
 
 // GenerationService 图片生成服务
 type GenerationService struct {
-	genRepo   repository2.GenerationRepository
-	styleRepo repository2.StyleRepository
+	genRepo   repository.GenerationRepository
+	styleRepo repository.StyleRepository
 	sdClient  *sdClient
 	cfg       *config.Config
 	sem       chan struct{} // 并发控制信号量
@@ -27,8 +27,8 @@ type GenerationService struct {
 
 // NewGenerationService 创建生成 Service
 func NewGenerationService(
-	genRepo repository2.GenerationRepository,
-	styleRepo repository2.StyleRepository,
+	genRepo repository.GenerationRepository,
+	styleRepo repository.StyleRepository,
 	sdClient *sdClient,
 	cfg *config.Config,
 	logger *slog.Logger,
@@ -44,7 +44,7 @@ func NewGenerationService(
 }
 
 // GetActiveStyles 获取所有活跃的风格
-func (s *GenerationService) GetActiveStyles(ctx context.Context) ([]models2.ImageStyle, error) {
+func (s *GenerationService) GetActiveStyles(ctx context.Context) ([]models.ImageStyle, error) {
 	return s.styleRepo.FindActive(ctx)
 }
 
@@ -75,9 +75,9 @@ func (s *GenerationService) GenerateSimple(ctx context.Context, userID uuid.UUID
 	}
 
 	// 创建数据库记录
-	record := &models2.GenerationRecord{
+	record := &models.GenerationRecord{
 		UserID:         userID,
-		Mode:           models2.ModeSimple,
+		Mode:           models.ModeSimple,
 		Prompt:         prompt,
 		NegativePrompt: negativePrompt,
 		StyleID:        &req.StyleID,
@@ -87,7 +87,7 @@ func (s *GenerationService) GenerateSimple(ctx context.Context, userID uuid.UUID
 		Steps:          steps,
 		Sampler:        sampler,
 		Seed:           -1,
-		Status:         models2.StatusPending,
+		Status:         models.StatusPending,
 	}
 
 	if err := s.genRepo.Create(ctx, record); err != nil {
@@ -99,7 +99,7 @@ func (s *GenerationService) GenerateSimple(ctx context.Context, userID uuid.UUID
 
 	return &api.GenerateResponse{
 		RecordID: record.ID,
-		Status:   models2.StatusPending,
+		Status:   models.StatusPending,
 	}, nil
 }
 
@@ -126,9 +126,9 @@ func (s *GenerationService) GeneratePro(ctx context.Context, userID uuid.UUID, r
 	}
 
 	// 创建数据库记录
-	record := &models2.GenerationRecord{
+	record := &models.GenerationRecord{
 		UserID:         userID,
-		Mode:           models2.ModePro,
+		Mode:           models.ModePro,
 		Prompt:         req.Prompt,
 		NegativePrompt: req.NegativePrompt,
 		Width:          req.Width,
@@ -137,7 +137,7 @@ func (s *GenerationService) GeneratePro(ctx context.Context, userID uuid.UUID, r
 		Steps:          req.Steps,
 		Sampler:        req.Sampler,
 		Seed:           req.Seed,
-		Status:         models2.StatusPending,
+		Status:         models.StatusPending,
 	}
 
 	if err := s.genRepo.Create(ctx, record); err != nil {
@@ -149,12 +149,12 @@ func (s *GenerationService) GeneratePro(ctx context.Context, userID uuid.UUID, r
 
 	return &api.GenerateResponse{
 		RecordID: record.ID,
-		Status:   models2.StatusPending,
+		Status:   models.StatusPending,
 	}, nil
 }
 
 // GetStatus 查询生成状态
-func (s *GenerationService) GetStatus(ctx context.Context, id uuid.UUID) (models2.GenerationRecord, error) {
+func (s *GenerationService) GetStatus(ctx context.Context, id uuid.UUID) (models.GenerationRecord, error) {
 	return s.genRepo.FindByID(ctx, id)
 }
 
@@ -171,7 +171,7 @@ func (s *GenerationService) processGeneration(recordID uuid.UUID) {
 	if err != nil {
 		return
 	}
-	record.Status = models2.StatusProcessing
+	record.Status = models.StatusProcessing
 	err = s.genRepo.Update(ctx, record)
 	if err != nil {
 		//TODO 打印日志
@@ -196,7 +196,7 @@ func (s *GenerationService) processGeneration(recordID uuid.UUID) {
 	record.DurationMs = duration
 
 	if err != nil {
-		record.Status = models2.StatusFailed
+		record.Status = models.StatusFailed
 		record.ErrorMessage = err.Error()
 		err = s.genRepo.Update(ctx, record)
 		if err != nil {
@@ -209,7 +209,7 @@ func (s *GenerationService) processGeneration(recordID uuid.UUID) {
 	// 保存图片到本地
 	imageURL, err := saveGeneratedImage(s.cfg.Upload.Dir, record.UserID, recordID, result.ImageData)
 	if err != nil {
-		record.Status = models2.StatusFailed
+		record.Status = models.StatusFailed
 		record.ErrorMessage = fmt.Sprintf("保存图片失败: %v", err)
 		err = s.genRepo.Update(ctx, record)
 		if err != nil {
@@ -220,7 +220,7 @@ func (s *GenerationService) processGeneration(recordID uuid.UUID) {
 	}
 
 	// 更新记录为完成
-	record.Status = models2.StatusCompleted
+	record.Status = models.StatusCompleted
 	record.ImageURL = imageURL
 	record.Seed = result.Seed
 	err = s.genRepo.Update(ctx, record)

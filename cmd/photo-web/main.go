@@ -9,12 +9,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	bootstrap2 "photo-web/bootstrap"
+	"photo-web/bootstrap"
 	"photo-web/config"
-	middleware2 "photo-web/middleware"
-	repository2 "photo-web/repository"
+	"photo-web/middleware"
+	"photo-web/repository"
 	"photo-web/router"
-	service2 "photo-web/service"
+	"photo-web/service"
 	"syscall"
 	"time"
 )
@@ -28,34 +28,34 @@ func main() {
 		log.Fatalf("加载配置失败: %v", err)
 	}
 
-	logger, err := bootstrap2.NewLogger(cfg, os.Stdout)
+	logger, err := bootstrap.NewLogger(cfg, os.Stdout)
 	if err != nil {
 		log.Fatalf("日志初始化失败：%v", err)
 	}
 	slog.SetDefault(logger)
 
 	// 初始化数据库
-	db, err := bootstrap2.InitDB(cfg)
+	db, err := bootstrap.InitDB(cfg)
 	if err != nil {
 		log.Fatalf("连接数据库失败: %v", err)
 	}
 
 	// 初始化 Redis
-	rdb, err := middleware2.NewClient(cfg)
+	rdb, err := middleware.NewClient(cfg)
 	if err != nil {
 		log.Fatalf("连接 Redis 失败: %v", err)
 	}
 
 	// 依赖注入 - Repository 层
-	userRepo := repository2.NewUserRepository(db)
-	styleRepo := repository2.NewStyleRepository(db)
-	generationRepo := repository2.NewGenerationRepository(db)
+	userRepo := repository.NewUserRepository(db)
+	styleRepo := repository.NewStyleRepository(db)
+	generationRepo := repository.NewGenerationRepository(db)
 
 	// 依赖注入 - Service 层
-	authService := service2.NewAuthService(userRepo, rdb, cfg)
-	sdClient := service2.NewSDClient(cfg)
-	generationService := service2.NewGenerationService(generationRepo, styleRepo, sdClient, cfg, logger)
-	historyService := service2.NewHistoryService(generationRepo)
+	authService := service.NewAuthService(userRepo, rdb, cfg)
+	sdClient := service.NewSDClient(cfg)
+	generationService := service.NewGenerationService(generationRepo, styleRepo, sdClient, cfg, logger)
+	historyService := service.NewHistoryService(generationRepo)
 
 	// 初始化路由
 	r := router.Setup(cfg, logger, authService, generationService, historyService)

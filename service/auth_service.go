@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"photo-web/api"
 	"photo-web/config"
-	redisCli "photo-web/middleware"
+	"photo-web/middleware"
 	"photo-web/models"
 	"photo-web/repository"
 	"time"
@@ -22,16 +22,16 @@ import (
 // AuthService 认证业务逻辑
 type AuthService struct {
 	userRepo repository.UserRepository
-	redis    *redisCli.Client
-	jwt      *redisCli.Manager
+	redis    *middleware.Client
+	jwt      *middleware.Manager
 }
 
 // NewAuthService 创建认证 Service
-func NewAuthService(userRepo repository.UserRepository, redis *redisCli.Client, cfg *config.Config) *AuthService {
+func NewAuthService(userRepo repository.UserRepository, redis *middleware.Client, cfg *config.Config) *AuthService {
 	return &AuthService{
 		userRepo: userRepo,
 		redis:    redis,
-		jwt:      redisCli.NewManager(cfg.JWT.Secret, cfg.JWT.AccessTokenTTL, cfg.JWT.RefreshTokenTTL),
+		jwt:      middleware.NewManager(cfg.JWT.Secret, cfg.JWT.AccessTokenTTL, cfg.JWT.RefreshTokenTTL),
 	}
 }
 
